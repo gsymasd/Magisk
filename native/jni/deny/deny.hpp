@@ -7,6 +7,7 @@
 
 #include <daemon.hpp>
 
+#define SIGTERMTHRD SIGUSR1
 #define ISOLATED_MAGIC "isolated"
 
 // CLI entries
@@ -16,9 +17,15 @@ int add_list(int client);
 int rm_list(int client);
 void ls_list(int client);
 
+// Process monitoring
+extern pthread_t monitor_thread;
+[[noreturn]] void proc_monitor();
+
 // Utility functions
 bool deny_enforced();
-bool is_deny_target(int uid, std::string_view process);
+bool is_deny_target(int uid, std::string_view process, int max_len = 1024);
+void crawl_procfs(const std::function<bool(int)> &fn);
+void rebuild_uid_map();
 
 // Revert
 void revert_daemon(int pid, int client);

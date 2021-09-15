@@ -17,7 +17,12 @@ static void lazy_unmount(const char* mountpoint) {
 void revert_daemon(int pid, int client) {
     if (fork_dont_care() == 0) {
         revert_unmount(pid);
-        write_int(client, 0);
+        if (client == -1) {
+            // Send resume signal
+            kill(pid, SIGCONT);
+        } else {
+            write_int(client, 0);
+        }
         _exit(0);
     }
 }

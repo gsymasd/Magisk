@@ -21,7 +21,7 @@ static pthread_mutex_t data_lock = PTHREAD_MUTEX_INITIALIZER;
 
 static atomic<bool> enforcement_status = false;
 
-static void rebuild_uid_map() {
+void rebuild_uid_map() {
     uid_proc_map->clear();
     string data_path(APP_DATA_DIR);
     size_t len = data_path.length();
@@ -53,8 +53,7 @@ static void rebuild_uid_map() {
 // Leave /proc fd opened as we're going to read from it repeatedly
 static DIR *procfp;
 
-template<class F>
-static void crawl_procfs(F &&fn) {
+void crawl_procfs(const std::function<bool(int)> &fn) {
     rewinddir(procfp);
     dirent *dp;
     int pid;
@@ -280,6 +279,10 @@ int enable_hide(bool late_props) {
     if (late_props)
         hide_late_sensitive_props();
 
+    // Start monitoring
+    if (new_daemon_thread(&proc_monitor))
+        return DAEMON_ERROR;
+
     enforcement_status = true;
     update_hide_config();
 
@@ -292,6 +295,7 @@ int disable_deny() {
 
     if (enforcement_status) {
         LOGI("* Disable DenyList\n");
+        pthread_kill(monitor_thread, SIGTERMTHRD);
         delete uid_proc_map;
         delete deny_set;
         uid_proc_map = nullptr;
@@ -310,11 +314,12 @@ void check_enforce_denylist(bool late_props) {
         if (dbs[DENYLIST_CONFIG])
             enable_hide(late_props);
     } else {
+        pthread_kill(monitor_thread, SIGALRM);
         hide_late_sensitive_props();
     }
 }
 
-bool is_deny_target(int uid, string_view process) {
+bool is_deny_target(int uid, string_view process, int max_len) {
     mutex_guard lock(data_lock);
 
     if (uid % 100000 >= 90000) {
@@ -324,6 +329,8 @@ bool is_deny_target(int uid, string_view process) {
             return false;
 
         for (auto &s : it->second) {
+            if (s.length() > max_len && process.length() > max_len && str_starts(s, process))
+                return true;
             if (str_starts(process, s))
                 return true;
         }
@@ -333,6 +340,8 @@ bool is_deny_target(int uid, string_view process) {
             return false;
 
         for (auto &s : it->second) {
+            if (s.length() > max_len && process.length() > max_len && str_starts(s, process))
+                return true;
             if (s == process)
                 return true;
         }

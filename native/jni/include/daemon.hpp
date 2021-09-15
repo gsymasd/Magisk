@@ -63,6 +63,6 @@ void su_daemon_handler(int client, ucred *credential);
 void zygisk_handler(int client, ucred *cred);
 
 // Denylist
-void check_enforce_denylist();
+void check_enforce_denylist(bool late_props);
 int disable_deny();
 int denylist_cli(int argc, char **argv);

@@ -10,7 +10,7 @@
 #define ISOLATED_MAGIC "isolated"
 
 // CLI entries
-int enable_hide();
+int enable_hide(bool late_props);
 int disable_deny();
 int add_list(int client);
 int rm_list(int client);
@@ -23,6 +23,10 @@ bool is_deny_target(int uid, std::string_view process);
 // Revert
 void revert_daemon(int pid, int client);
 void revert_unmount(int pid = -1);
+
+// props
+void hide_sensitive_props();
+void hide_late_sensitive_props();
 
 enum : int {
     ENFORCE_DENY,

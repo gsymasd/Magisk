@@ -25,6 +25,7 @@ LOCAL_SRC_FILES := \
     deny/cli.cpp \
     deny/utils.cpp \
     deny/revert.cpp \
+    deny/props.cpp \
     resetprop/persist_properties.cpp \
     resetprop/resetprop.cpp \
     su/su.cpp \

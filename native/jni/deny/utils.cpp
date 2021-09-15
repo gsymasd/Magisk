@@ -256,7 +256,7 @@ static void update_hide_config() {
     db_err(err);
 }
 
-int enable_hide() {
+int enable_hide(bool late_props) {
     if (enforcement_status)
         return DENY_IS_ENFORCED;
 
@@ -275,6 +275,10 @@ int enable_hide() {
     // Initialize the hide list
     if (!init_list())
         return DAEMON_ERROR;
+
+    hide_sensitive_props();
+    if (late_props)
+        hide_late_sensitive_props();
 
     enforcement_status = true;
     update_hide_config();
@@ -299,12 +303,14 @@ int disable_deny() {
     return DAEMON_SUCCESS;
 }
 
-void check_enforce_denylist() {
+void check_enforce_denylist(bool late_props) {
     if (!enforcement_status) {
         db_settings dbs;
         get_db_settings(dbs, DENYLIST_CONFIG);
         if (dbs[DENYLIST_CONFIG])
-            enable_hide();
+            enable_hide(late_props);
+    } else {
+        hide_late_sensitive_props();
     }
 }
 

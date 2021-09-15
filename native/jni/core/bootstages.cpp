@@ -301,7 +301,7 @@ void post_fs_data(int client) {
         disable_deny();
     } else {
         exec_common_scripts("post-fs-data");
-        check_enforce_denylist();
+        check_enforce_denylist(false);
         handle_modules();
     }
 
@@ -350,7 +350,7 @@ void boot_complete(int client) {
     if (access(SECURE_DIR, F_OK) != 0)
         xmkdir(SECURE_DIR, 0700);
 
-    check_enforce_denylist();
+    check_enforce_denylist(true);
 
     if (!check_manager()) {
         if (access(MANAGERAPK, F_OK) == 0) {

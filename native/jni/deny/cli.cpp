@@ -48,7 +48,7 @@ void denylist_handler(int client, ucred *cred) {
 
     switch (req) {
     case ENFORCE_DENY:
-        res = enable_hide();
+        res = enable_hide(true);
         break;
     case DISABLE_DENY:
         res = disable_deny();

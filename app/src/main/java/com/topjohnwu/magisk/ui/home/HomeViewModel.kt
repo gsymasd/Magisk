@@ -75,6 +75,9 @@ class HomeViewModel(
     var stateManagerProgress = 0
         set(value) = set(value, field, { field = it }, BR.stateManagerProgress)
 
+    @get:Bindable
+    val showSafetyNet get() = Info.hasGMS && isConnected.get()
+
     val itemBinding = itemBindingOf<IconLink> {
         it.bindExtra(BR.viewModel, this)
     }
@@ -83,6 +86,7 @@ class HomeViewModel(
 
     override fun refresh() = viewModelScope.launch {
         state = State.LOADING
+        notifyPropertyChanged(BR.showSafetyNet)
         Info.getRemote(svc)?.apply {
             state = State.LOADED
 
@@ -129,6 +133,9 @@ class HomeViewModel(
     fun onMagiskPressed() = withExternalRW {
         HomeFragmentDirections.actionHomeFragmentToInstallFragment().navigate()
     }
+
+    fun onSafetyNetPressed() =
+        HomeFragmentDirections.actionHomeFragmentToSafetynetFragment().navigate()
 
     fun hideNotice() {
         Config.safetyNotice = false

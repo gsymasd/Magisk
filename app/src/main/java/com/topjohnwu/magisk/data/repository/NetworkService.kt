@@ -7,6 +7,7 @@ import com.topjohnwu.magisk.core.Config.Value.CANARY_CHANNEL
 import com.topjohnwu.magisk.core.Config.Value.CUSTOM_CHANNEL
 import com.topjohnwu.magisk.core.Config.Value.DEFAULT_CHANNEL
 import com.topjohnwu.magisk.core.Config.Value.STABLE_CHANNEL
+import com.topjohnwu.magisk.core.Const
 import com.topjohnwu.magisk.core.Info
 import com.topjohnwu.magisk.core.model.MagiskJson
 import com.topjohnwu.magisk.core.model.StubJson
@@ -78,6 +79,7 @@ class NetworkService(
     }
 
     // Fetch files
+    suspend fun fetchSafetynet() = wrap { jsd.fetchSafetynet() }
     suspend fun fetchBootctl() = wrap { jsd.fetchBootctl() }
     suspend fun fetchInstaller() = wrap {
         val sha = fetchMainVersion()
